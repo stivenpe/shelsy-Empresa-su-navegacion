@@ -925,7 +925,7 @@ const categorias = {
       { item: 3, producto: "AREQUIPE GARRAFA", descripcion: "", precio: "14500" },
       { item: 4, producto: "AREQUIPE KILO TAZA", descripcion: "", precio: "11500" },
       { item: 5, producto: "AREQUIPE LA MEJOR", descripcion: "250G", precio: "4000" },
-      { item: 6, producto: "AREQUIPE LA MEJOR", descripcion: "X6UND", precio: "10000" },
+      { item:  6, producto: "AREQUIPE LA MEJOR", descripcion: "X6UND", precio: "10000" },
       { item: 7, producto: "AREQUIPE", descripcion: "LIBRA", precio: "5000" },
       { item: 8, producto: "AREQUIPE LIBRA ALPINA", descripcion: "", precio: "8000" },
       { item: 9, producto: "AREQUIPE TETERO", descripcion: "400GR", precio: "6800" },
@@ -1216,10 +1216,13 @@ const categorias = {
   },
 }
 
+// Variables globales
 let currentCategory = 'fritolay';
 let editMode = false;
+let orderMode = false;
 let currentMes = "JUNIO 2025";
 let logoImageData = null;
+let orderList = []; // Lista de productos en el pedido
 
 // Cargar el logo como imagen base64 para el PDF
 function loadLogoImage() {
@@ -1413,32 +1416,283 @@ function downloadPDF() {
   doc.save(fileName);
 }
 
+function downloadOrderPDF() {
+  if (orderList.length === 0) {
+    alert("No hay productos en el pedido para generar el PDF.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  
+  // Configurar colores
+  const orangeColor = [255, 107, 53];
+  const yellowColor = [255, 213, 79];
+  const blueColor = [25, 118, 210];
+  
+  // HEADER - Fondo naranja
+  doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
+  doc.rect(0, 0, 210, 25, 'F');
+  
+  // Logo circular "F"
+  doc.setFillColor(255, 215, 0);
+  doc.circle(20, 12.5, 8, 'F');
+  doc.setTextColor(255, 107, 53);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("F", 20, 15, { align: "center" });
+  
+  // Texto del header
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.text("Confitería La Gran Fortuna", 35, 10);
+  doc.setFontSize(10);
+  doc.text("Sistema de Pedidos", 35, 17);
+  
+  // SECCIÓN AMARILLA
+  doc.setFillColor(yellowColor[0], yellowColor[1], yellowColor[2]);
+  doc.rect(10, 35, 190, 25, 'F');
+  
+  // Logo de confitería (imagen real)
+  if (logoImageData) {
+    try {
+      doc.addImage(logoImageData, 'PNG', 15, 40, 15, 15);
+    } catch (error) {
+      // Fallback si hay error con la imagen
+      doc.setFillColor(76, 175, 80);
+      doc.circle(22.5, 47.5, 7.5, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(6);
+      doc.text("LOGO", 22.5, 49, { align: "center" });
+    }
+  } else {
+    // Fallback si no se cargó la imagen
+    doc.setFillColor(76, 175, 80);
+    doc.circle(22.5, 47.5, 7.5, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(6);
+    doc.text("LOGO", 22.5, 49, { align: "center" });
+  }
+  
+  // Título principal
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("PEDIDO DE PRODUCTOS", 40, 45);
+  doc.setFontSize(9);
+  doc.text("Lista de productos seleccionados", 40, 52);
+  
+  // Badge del mes
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(150, 42, 35, 12, 6, 6, 'F');
+  doc.setTextColor(255, 107, 53);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text(currentMes, 167.5, 49, { align: "center" });
+  
+  // TABLA DE PEDIDO usando autoTable
+  const tableData = orderList.map((item, index) => [
+    (index + 1).toString(),
+    item.producto,
+    item.descripcion,
+    item.cantidad.toString(),
+    formatPrice(item.precio),
+    formatPrice(item.precio * item.cantidad)
+  ]);
+  
+  // Calcular total
+  const total = orderList.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  
+  doc.autoTable({
+    head: [['#', 'PRODUCTO', 'DESCRIPCIÓN', 'CANT.', 'PRECIO UNIT.', 'SUBTOTAL']],
+    body: tableData,
+    startY: 70,
+    styles: {
+      fontSize: 10,
+      cellPadding: 1.5,
+      lineColor: [224, 224, 224],
+      lineWidth: 0.1,
+    },
+    headStyles: {
+      fillColor: blueColor,
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 9,
+      halign: 'center'
+    },
+    columnStyles: {
+      0: { 
+        halign: 'center', 
+        cellWidth: 30,
+        fillColor: [248, 249, 250]
+      },
+      1: { 
+        halign: 'left',
+        cellWidth: 40,
+        fontSize: 8
+      },
+      2: { 
+        halign: 'left',
+        cellWidth: 30,
+        fontSize: 8
+      },
+      3: { 
+        halign: 'center', 
+        cellWidth: 25,
+        fontStyle: 'bold'
+      },
+      4: { 
+        halign: 'right', 
+        cellWidth: 30,
+        textColor: [46, 125, 50]
+      },
+      5: { 
+        halign: 'right', 
+        cellWidth: 35,
+        textColor: [46, 125, 50],
+        fontStyle: 'bold'
+      }
+    },
+    alternateRowStyles: {
+      fillColor: [248, 249, 250]
+    },
+    margin: { top: 70, left: 10, right: 10 },
+    tableLineColor: [224, 224, 224],
+    tableLineWidth: 0.1,
+  });
+  
+  // Agregar total
+  const finalY = doc.lastAutoTable.finalY || 70;
+  doc.setFillColor(blueColor[0], blueColor[1], blueColor[2]);
+  doc.rect(140, finalY + 5, 60, 12, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(`TOTAL: ${formatPrice(total)}`, 170, finalY + 13, { align: "center" });
+  
+  // FOOTER en todas las páginas
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    
+    // Fondo del footer
+    doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
+    doc.rect(0, 285, 210, 12, 'F');
+    
+    // Texto del footer
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    const footerText = `© 2025 Confitería La Gran Fortuna - Pedido - Página ${i} de ${totalPages} - Generado el ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`;
+    doc.text(footerText, 105, 292, { align: "center" });
+  }
+  
+  // Información adicional
+  if (finalY < 240) {
+    doc.setTextColor(102, 102, 102);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Total de productos en pedido: ${orderList.length}`, 15, finalY + 25);
+    doc.text(`Cantidad total de unidades: ${orderList.reduce((sum, item) => sum + item.cantidad, 0)}`, 15, finalY + 32);
+    doc.text(`Fecha de generación: ${new Date().toLocaleDateString('es-CO')} a las ${new Date().toLocaleTimeString('es-CO')}`, 15, finalY + 39);
+  }
+  
+  // Descargar con nombre personalizado
+  const fileName = `Pedido_${currentMes.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+}
+
 function renderTable() {
   const tbody = document.querySelector("#productTable tbody");
   const accionesHeader = document.getElementById("accionesHeader");
+  const cantidadHeader = document.getElementById("cantidadHeader");
   
   tbody.innerHTML = "";
   
-  // Mostrar/ocultar columna de acciones
+  // Mostrar/ocultar columnas según el modo
   accionesHeader.style.display = editMode ? "table-cell" : "none";
+  cantidadHeader.style.display = orderMode ? "table-cell" : "none";
 
   categorias[currentCategory].productos.forEach((prod, index) => {
     const row = document.createElement("tr");
+
+    let cantidadCell = '';
+    if (orderMode) {
+      cantidadCell = `<td><input type="number" min="0" value="0" onchange="updateOrderQuantity(${index}, this.value)" class="quantity-input"></td>`;
+    }
+
+    let accionesCell = '';
+    if (editMode) {
+      accionesCell = `<td><button class="delete-btn" onclick="deleteProduct(${index})">🗑️ Eliminar</button></td>`;
+    }
 
     row.innerHTML = `
       <td>${prod.item}</td>
       <td>${editMode ? `<input type="text" value="${prod.producto}" onchange="updateProduct(${index}, 'producto', this.value)">` : prod.producto}</td>
       <td>${editMode ? `<input type="text" value="${prod.descripcion}" onchange="updateProduct(${index}, 'descripcion', this.value)">` : prod.descripcion}</td>
       <td>${editMode ? `<input type="number" value="${prod.precio}" onchange="updateProduct(${index}, 'precio', this.value)">` : formatPrice(prod.precio)}</td>
-      ${editMode ? `<td><button class="delete-btn" onclick="deleteProduct(${index})">🗑️ Eliminar</button></td>` : ''}
+      ${cantidadCell}
+      ${accionesCell}
     `;
 
     tbody.appendChild(row);
   });
 
-  // Mostrar/ocultar botones según el modo de edición
+  // Mostrar/ocultar botones según el modo
   document.getElementById("addBtn").style.display = editMode ? "inline-flex" : "none";
   document.getElementById("downloadBtn").style.display = editMode ? "inline-flex" : "none";
+  document.getElementById("finalizarPedidoBtn").style.display = orderMode ? "inline-flex" : "none";
+  document.getElementById("verPedidoBtn").style.display = orderMode ? "inline-flex" : "none";
+}
+
+function updateOrderQuantity(productIndex, quantity) {
+  const prod = categorias[currentCategory].productos[productIndex];
+  const qty = parseInt(quantity) || 0;
+  
+  if (qty > 0) {
+    // Buscar si el producto ya está en el pedido
+    const existingIndex = orderList.findIndex(item => 
+      item.categoria === currentCategory && 
+      item.producto === prod.producto && 
+      item.descripcion === prod.descripcion
+    );
+    
+    if (existingIndex >= 0) {
+      // Actualizar cantidad existente
+      orderList[existingIndex].cantidad = qty;
+    } else {
+      // Agregar nuevo producto al pedido
+      orderList.push({
+        categoria: currentCategory,
+        producto: prod.producto,
+        descripcion: prod.descripcion,
+        precio: parseInt(prod.precio),
+        cantidad: qty
+      });
+    }
+  } else {
+    // Remover del pedido si cantidad es 0
+    const existingIndex = orderList.findIndex(item => 
+      item.categoria === currentCategory && 
+      item.producto === prod.producto && 
+      item.descripcion === prod.descripcion
+    );
+    
+    if (existingIndex >= 0) {
+      orderList.splice(existingIndex, 1);
+    }
+  }
+  
+  updateOrderCounter();
+}
+
+function updateOrderCounter() {
+  const counter = document.getElementById("orderCounter");
+  if (counter) {
+    const totalItems = orderList.reduce((sum, item) => sum + item.cantidad, 0);
+    counter.textContent = totalItems;
+    counter.style.display = totalItems > 0 ? "inline" : "none";
+  }
 }
 
 function updateProduct(index, field, value) {
@@ -1480,10 +1734,15 @@ function editMes() {
 function toggleEdit() {
   if (!editMode) {
     const pass = prompt("Ingrese contraseña para activar edición:");
-    if (pass !== "shelsy") {
+    if (pass !== "@shelsdria.x") {
       alert("Contraseña incorrecta.");
       return;
     }
+  }
+
+  // Si está en modo pedido, desactivarlo
+  if (orderMode) {
+    toggleOrder();
   }
 
   editMode = !editMode;
@@ -1504,6 +1763,163 @@ function toggleEdit() {
   renderTable();
 }
 
+function toggleOrder() {
+  // Si está en modo edición, desactivarlo
+  if (editMode) {
+    toggleEdit();
+  }
+
+  orderMode = !orderMode;
+  const toggleBtn = document.querySelector('.order-toggle');
+  
+  if (orderMode) {
+    toggleBtn.innerHTML = '<span class="order-icon">❌</span> Cancelar Pedido';
+    toggleBtn.style.background = '#f44336';
+  } else {
+    toggleBtn.innerHTML = '<span class="order-icon">🛒</span> Agregar Pedido';
+    toggleBtn.style.background = '#2e7d32';
+    // Limpiar cantidades al salir del modo pedido
+    clearOrderQuantities();
+  }
+  
+  renderTable();
+}
+
+function clearOrderQuantities() {
+  const quantityInputs = document.querySelectorAll('.quantity-input');
+  quantityInputs.forEach(input => {
+    input.value = 0;
+  });
+}
+
+function finalizarPedido() {
+  if (orderList.length === 0) {
+    alert("No hay productos en el pedido.");
+    return;
+  }
+  
+  const total = orderList.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  const totalItems = orderList.reduce((sum, item) => sum + item.cantidad, 0);
+  
+  const confirmMessage = `¿Finalizar pedido?\n\nTotal de productos: ${orderList.length}\nCantidad total: ${totalItems} unidades\nTotal: ${formatPrice(total)}`;
+  
+  if (confirm(confirmMessage)) {
+    downloadOrderPDF();
+    // Limpiar pedido después de generar PDF
+    orderList = [];
+    updateOrderCounter();
+    clearOrderQuantities();
+    alert("Pedido finalizado y PDF generado exitosamente.");
+  }
+}
+
+// NUEVA FUNCIÓN: Ver Pedido
+function verPedido() {
+  if (orderList.length === 0) {
+    alert("No hay productos en el pedido para mostrar.");
+    return;
+  }
+
+  // Crear modal para mostrar el pedido
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  `;
+
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+  `;
+
+  // Calcular totales
+  const total = orderList.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  const totalItems = orderList.reduce((sum, item) => sum + item.cantidad, 0);
+
+  // Crear contenido del modal
+  modalContent.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ff6b35; padding-bottom: 15px;">
+      <h2 style="color: #ff6b35; margin: 0; font-size: 1.8rem;">📋 Resumen del Pedido</h2>
+      <button onclick="this.closest('.modal').remove()" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px;">✕</button>
+    </div>
+    
+    <div style="margin-bottom: 20px; background: linear-gradient(135deg, #ffd54f, #ffb300); padding: 15px; border-radius: 10px; color: white;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="font-size: 1.1rem;">Total de productos: ${orderList.length}</strong><br>
+          <span>Cantidad total: ${totalItems} unidades</span>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.5rem; font-weight: bold;">${formatPrice(total)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr style="background: linear-gradient(135deg, #1976d2, #1565c0); color: white;">
+            <th style="padding: 12px; text-align: center; border-radius: 8px 0 0 0;">#</th>
+            <th style="padding: 12px; text-align: left;">Producto</th>
+            <th style="padding: 12px; text-align: left;">Descripción</th>
+            <th style="padding: 12px; text-align: center;">Cant.</th>
+            <th style="padding: 12px; text-align: right;">Precio Unit.</th>
+            <th style="padding: 12px; text-align: right; border-radius: 0 8px 0 0;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orderList.map((item, index) => `
+            <tr style="border-bottom: 1px solid #e0e0e0; ${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
+              <td style="padding: 10px; text-align: center; font-weight: bold; color: #666;">${index + 1}</td>
+              <td style="padding: 10px; font-weight: 600;">${item.producto}</td>
+              <td style="padding: 10px; color: #666;">${item.descripcion}</td>
+              <td style="padding: 10px; text-align: center; font-weight: bold; color: #2e7d32;">${item.cantidad}</td>
+              <td style="padding: 10px; text-align: right; color: #2e7d32;">${formatPrice(item.precio)}</td>
+              <td style="padding: 10px; text-align: right; font-weight: bold; color: #2e7d32;">${formatPrice(item.precio * item.cantidad)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+      <button onclick="downloadOrderPDF()" style="background: #2e7d32; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+        📄 Descargar PDF
+      </button>
+      <button onclick="this.closest('.modal').remove()" style="background: #666; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+        Cerrar
+      </button>
+    </div>
+  `;
+
+  modal.className = 'modal';
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  // Cerrar modal al hacer clic fuera del contenido
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
+
 function toggleMenu() {
   document.getElementById('mobileNav').classList.toggle('visible');
 }
@@ -1512,4 +1928,5 @@ function toggleMenu() {
 window.onload = function() {
   loadLogoImage(); // Cargar el logo para el PDF
   renderTable();
+  updateOrderCounter();
 };

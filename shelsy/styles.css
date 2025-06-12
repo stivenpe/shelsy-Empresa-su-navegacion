@@ -210,7 +210,7 @@ header {
   flex-wrap: wrap;
 }
 
-.edit-toggle, #addBtn, .download-btn {
+.edit-toggle, .order-toggle, #addBtn, .download-btn, .finalize-order-btn, .view-order-btn {
   background: #333;
   color: white;
   border: none;
@@ -223,11 +223,20 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
 }
 
 .edit-toggle:hover, #addBtn:hover {
   background: #555;
   transform: translateY(-1px);
+}
+
+.order-toggle {
+  background: #2e7d32;
+}
+
+.order-toggle:hover {
+  background: #388e3c;
 }
 
 .download-btn {
@@ -238,7 +247,39 @@ header {
   background: #388e3c;
 }
 
-.edit-icon, .download-icon {
+.finalize-order-btn {
+  background: #1976d2;
+}
+
+.finalize-order-btn:hover {
+  background: #1565c0;
+}
+
+.view-order-btn {
+  background: #7b1fa2;
+}
+
+.view-order-btn:hover {
+  background: #6a1b9a;
+}
+
+.order-counter {
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+
+.edit-icon, .order-icon, .download-icon, .finalize-icon, .view-icon {
   font-size: 1rem;
 }
 
@@ -317,6 +358,22 @@ input[type="text"], input[type="number"] {
 }
 
 input[type="text"]:focus, input[type="number"]:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.quantity-input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 2px solid #2e7d32;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.quantity-input:focus {
   outline: none;
   border-color: #1976d2;
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
@@ -420,7 +477,7 @@ footer {
     flex-direction: column;
   }
 
-  .edit-toggle, #addBtn, .download-btn {
+  .edit-toggle, .order-toggle, #addBtn, .download-btn, .finalize-order-btn, .view-order-btn {
     width: 100%;
     justify-content: center;
   }
@@ -436,6 +493,10 @@ footer {
 
   th:last-child, td:last-child {
     width: 100px;
+  }
+
+  .quantity-input {
+    width: 60px;
   }
 }
 
@@ -464,6 +525,10 @@ footer {
   th, td {
     padding: 0.5rem 0.3rem;
     font-size: 0.75rem;
+  }
+
+  .quantity-input {
+    width: 50px;
   }
 }
 

@@ -76,10 +76,23 @@
             <span class="edit-icon">✏️</span>
             Activar Edición
           </button>
+          <button class="order-toggle" onclick="toggleOrder()">
+            <span class="order-icon">🛒</span>
+            Agregar Pedido
+            <span id="orderCounter" class="order-counter">0</span>
+          </button>
           <button id="addBtn" onclick="addRow()" style="display: none;">➕ Agregar Producto</button>
           <button id="downloadBtn" onclick="downloadPDF()" style="display: none;" class="download-btn">
             <span class="download-icon">📄</span>
             Descargar PDF
+          </button>
+          <button id="finalizarPedidoBtn" onclick="finalizarPedido()" style="display: none;" class="finalize-order-btn">
+            <span class="finalize-icon">✅</span>
+            Finalizar Pedido
+          </button>
+          <button id="verPedidoBtn" onclick="verPedido()" style="display: none;" class="view-order-btn">
+            <span class="view-icon">👁️</span>
+            Ver Pedido
           </button>
         </div>
       </div>
@@ -92,6 +105,7 @@
               <th>PRODUCTO</th>
               <th>DESCRIPCIÓN</th>
               <th>PRECIO</th>
+              <th id="cantidadHeader" style="display: none;">CANTIDAD</th>
               <th id="accionesHeader" style="display: none;">ACCIONES</th>
             </tr>
           </thead>
