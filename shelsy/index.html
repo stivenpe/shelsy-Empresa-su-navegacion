@@ -1,126 +1,162 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Productos La Gran Fortuna</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-</head>
-<body>
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="header-content">
-      <div class="logo-circle">F</div>
-      <div class="header-text">
-        <h1>La Granfortuna</h1>
-        <p>Sistema de Gestión de Productos</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos La Gran Fortuna</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+      <div class="header-content">
+        <div class="logo-circle">F</div>
+        <div class="header-text">
+          <h1>La Granfortuna</h1>
+          <p>Sistema de Gestión de Productos</p>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <nav class="mobile-nav" id="mobileNav">
-    <ul>
-      <li><a href="#">Inicio</a></li>
-      <li><a href="#productos">Productos</a></li>
-      <li><a href="#contacto">Contacto</a></li>
-    </ul>
-  </nav>
+    <nav class="mobile-nav" id="mobileNav">
+      <ul>
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#productos">Productos</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
 
-  <main>
-    <section class="tabla-section" id="productos">
-      <div class="productos-header">
-        <div class="header-info">
-          <div class="logo-confiteria">
-            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-UlwXu5exLWtCN5ygPxClO74gy5uGxG.png" alt="Confitería La Gran Fortuna" class="confiteria-logo">
+    <main>
+      <section class="tabla-section" id="productos">
+        <div class="productos-header">
+          <div class="header-info">
+            <div class="logo-confiteria">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-UlwXu5exLWtCN5ygPxClO74gy5uGxG.png"
+                alt="Confitería La Gran Fortuna"
+                class="confiteria-logo"
+              />
+            </div>
+            <div class="title-section">
+              <h2 id="categoria-titulo">LÍNEA DE FRITOLAY Y DEM��S MEKATOS</h2>
+              <p>Gestión de inventario y precios</p>
+            </div>
           </div>
-          <div class="title-section">
-            <h2 id="categoria-titulo">LÍNEA DE FRITOLAY Y DEMÁS MEKATOS</h2>
-            <p>Gestión de inventario y precios</p>
+          <div class="mes-badge" id="mesBadge" onclick="editMes()">
+            JUNIO 2025
           </div>
         </div>
-        <div class="mes-badge" id="mesBadge" onclick="editMes()">JUNIO 2025</div>
-      </div>
 
-      <div class="controles">
-        <div class="categoria-selector">
-          <label for="categorySelect">Categoría:</label>
-          <select id="categorySelect" onchange="changeCategory(this.value)">
-            <option value="fritolay">Fritolay</option>
-            <option value="dulceria">Dulcería</option>
-            <option value="licores">Licores</option>
-            <option value="cerveza">Cerveza</option>
-            <option value="galleteria">Galletería</option>
-            <option value="lacteos">Lácteos y Cárnicos</option>
-            <option value="gaseosas">Gaseosas y Jugos</option>
-            <option value="aseo">Línea de Aseo</option>
-            <option value="enlatados">Enlatados</option>
-            <option value="salsas">Salsas y Mermeladas</option>
-            <option value="medicamentos">Línea de Medicamentos</option>
-            <option value="cigarros">Línea de Cigarros</option>
-            <option value="chocolatinas">Chocolates, Chocolatinas y Arequipes</option>
-            <option value="tortasponques">Tortas y Ponques</option>
-            <option value="cafechocolate">Café y Chocolate</option>
-            <option value="galletasnavidenas">Línea Navideña</option>
-            <option value="vasos">Vasos</option>
-            <option value="bolsas">Línea de Bolsas</option>
-            <option value="varios">Línea de Varios</option>
-            <option value="contenedores">Línea de Contenedores</option>
-            <option value="pitillospalillos">Pitillos, Palillos y Platos</option>
-          </select>
+        <div class="controles">
+          <div class="categoria-selector">
+            <label for="categorySelect">Categoría:</label>
+            <select id="categorySelect" onchange="changeCategory(this.value)">
+              <option value="fritolay">Fritolay</option>
+              <option value="dulceria">Dulcería</option>
+              <option value="licores">Licores</option>
+              <option value="cerveza">Cerveza</option>
+              <option value="galleteria">Galletería</option>
+              <option value="lacteos">Lácteos y Cárnicos</option>
+              <option value="gaseosas">Gaseosas y Jugos</option>
+              <option value="aseo">Línea de Aseo</option>
+              <option value="enlatados">Enlatados</option>
+              <option value="salsas">Salsas y Mermeladas</option>
+              <option value="medicamentos">Línea de Medicamentos</option>
+              <option value="cigarros">Línea de Cigarros</option>
+              <option value="chocolatinas">
+                Chocolates, Chocolatinas y Arequipes
+              </option>
+              <option value="tortasponques">Tortas y Ponques</option>
+              <option value="cafechocolate">Café y Chocolate</option>
+              <option value="galletasnavidenas">Línea Navideña</option>
+              <option value="vasos">Vasos</option>
+              <option value="bolsas">Línea de Bolsas</option>
+              <option value="varios">Línea de Varios</option>
+              <option value="contenedores">Línea de Contenedores</option>
+              <option value="pitillospalillos">
+                Pitillos, Palillos y Platos
+              </option>
+            </select>
+          </div>
+
+          <div class="acciones">
+            <button class="edit-toggle" onclick="toggleEdit()">
+              <span class="edit-icon">✏️</span>
+              Activar Edición
+            </button>
+            <button class="order-toggle" onclick="toggleOrder()">
+              <span class="order-icon">🛒</span>
+              Agregar Pedido
+              <span id="orderCounter" class="order-counter">0</span>
+            </button>
+            <button id="addBtn" onclick="addRow()" style="display: none">
+              ➕ Agregar Producto
+            </button>
+            <button
+              id="downloadBtn"
+              onclick="downloadPDF()"
+              style="display: none"
+              class="download-btn"
+            >
+              <span class="download-icon">📄</span>
+              Descargar PDF
+            </button>
+            <button
+              id="saveBtn"
+              onclick="saveData()"
+              style="display: none"
+              class="save-btn"
+            >
+              <span class="save-icon">💾</span>
+              GUARDAR CAMBIOS
+            </button>
+            <button
+              id="finalizarPedidoBtn"
+              onclick="finalizarPedido()"
+              style="display: none"
+              class="finalize-order-btn"
+            >
+              <span class="finalize-icon">✅</span>
+              Finalizar Pedido
+            </button>
+            <button
+              id="verPedidoBtn"
+              onclick="verPedido()"
+              style="display: none"
+              class="view-order-btn"
+            >
+              <span class="view-icon">👁️</span>
+              Ver Pedido
+            </button>
+          </div>
         </div>
 
-        <div class="acciones">
-          <button class="edit-toggle" onclick="toggleEdit()">
-            <span class="edit-icon">✏️</span>
-            Activar Edición
-          </button>
-          <button class="order-toggle" onclick="toggleOrder()">
-            <span class="order-icon">🛒</span>
-            Agregar Pedido
-            <span id="orderCounter" class="order-counter">0</span>
-          </button>
-          <button id="addBtn" onclick="addRow()" style="display: none;">➕ Agregar Producto</button>
-          <button id="downloadBtn" onclick="downloadPDF()" style="display: none;" class="download-btn">
-            <span class="download-icon">📄</span>
-            Descargar PDF
-          </button>
-          <button id="finalizarPedidoBtn" onclick="finalizarPedido()" style="display: none;" class="finalize-order-btn">
-            <span class="finalize-icon">✅</span>
-            Finalizar Pedido
-          </button>
-          <button id="verPedidoBtn" onclick="verPedido()" style="display: none;" class="view-order-btn">
-            <span class="view-icon">👁️</span>
-            Ver Pedido
-          </button>
+        <div class="tabla-contenedor">
+          <table id="productTable">
+            <thead>
+              <tr>
+                <th>ITEM</th>
+                <th>PRODUCTO</th>
+                <th>DESCRIPCIÓN</th>
+                <th>PRECIO</th>
+                <th id="cantidadHeader" style="display: none">CANTIDAD</th>
+                <th id="accionesHeader" style="display: none">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Productos se agregan por JavaScript -->
+            </tbody>
+          </table>
         </div>
-      </div>
+      </section>
+    </main>
 
-      <div class="tabla-contenedor">
-        <table id="productTable">
-          <thead>
-            <tr>
-              <th>ITEM</th>
-              <th>PRODUCTO</th>
-              <th>DESCRIPCIÓN</th>
-              <th>PRECIO</th>
-              <th id="cantidadHeader" style="display: none;">CANTIDAD</th>
-              <th id="accionesHeader" style="display: none;">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Productos se agregan por JavaScript -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+    <footer>
+      <p>&copy; 2025 Confitería La Gran Fortuna</p>
+    </footer>
 
-  <footer>
-    <p>&copy; 2025 Confitería La Gran Fortuna</p>
-  </footer>
-
-  <script src="main.js"></script>
-</body>
+    <script src="main.js"></script>
+  </body>
 </html>
