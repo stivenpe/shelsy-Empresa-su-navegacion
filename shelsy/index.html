@@ -157,6 +157,38 @@
       <p>&copy; 2025 Confitería La Gran Fortuna</p>
     </footer>
 
+    <!-- Firebase -->
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js'; 
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js'; 
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMY61pvdBJK64evqkahcgEeHFjyAFLRAY",
+    authDomain: "confiterialagranfortuna-9bf2b.firebaseapp.com",
+    projectId: "confiterialagranfortuna-9bf2b",
+    storageBucket: "confiterialagranfortuna-9bf2b.firebasestorage.app",
+    messagingSenderId: "13474874852",
+    appId: "1:13474874852:web:4d1f97d6074b44bda073f1"
+  };
+
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Función para guardar en Firebase
+  window.saveToFirebase = function(data) {
+    set(ref(db, 'inventario'), data);
+  }
+
+  // Función para cargar desde Firebase
+  window.loadFromFirebase = function(callback) {
+    onValue(ref(db, 'inventario'), (snapshot) => {
+      callback(snapshot.val());
+    });
+  }
+</script>
+
     <script src="main.js"></script>
   </body>
 </html>
