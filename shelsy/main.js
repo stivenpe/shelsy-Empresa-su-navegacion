@@ -6773,19 +6773,26 @@ function addRow() {
   renderTable();
 }
 
-// Funciones de persistencia de datos
 function saveData() {
   try {
     const dataToSave = {
       categorias: categorias,
       currentMes: currentMes,
     };
+
+    // Guardar localmente
     localStorage.setItem("confiteria_data", JSON.stringify(dataToSave));
+
+    // Guardar en Firebase si está disponible
+    if (typeof saveToFirebase === 'function') {
+      saveToFirebase(dataToSave);
+    }
+
     showSaveIndicator();
-    alert("¡Cambios guardados exitosamente!");
+    alert("✅ Cambios guardados local y remotamente");
   } catch (error) {
     console.error("Error al guardar datos:", error);
-    alert("Error al guardar los cambios. Por favor, inténtelo de nuevo.");
+    alert("❌ Error al guardar los cambios");
   }
 }
 
@@ -6829,33 +6836,62 @@ function showSaveIndicator() {
 }
 
 function loadData() {
-  try {
-    const savedData = localStorage.getItem("confiteria_data");
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
+  return new Promise((resolve, reject) => {
+    if (typeof loadFromFirebase === 'function') {
+      loadFromFirebase((firebaseData) => {
+        if (firebaseData) {
+          Object.keys(firebaseData.categorias).forEach(categoryKey => {
+            if (categorias[categoryKey]) {
+              categorias[categoryKey] = firebaseData.categorias[categoryKey];
+            }
+          });
 
-      // Cargar categorías guardadas si existen
-      if (parsedData.categorias) {
-        // Mantener la estructura original pero actualizar con datos guardados
-        Object.keys(parsedData.categorias).forEach((categoryKey) => {
-          if (categorias[categoryKey]) {
-            categorias[categoryKey] = parsedData.categorias[categoryKey];
+          if (firebaseData.currentMes) {
+            currentMes = firebaseData.currentMes;
+            document.getElementById("mesBadge").textContent = currentMes;
           }
-        });
-      }
 
-      // Cargar mes guardado si existe
-      if (parsedData.currentMes) {
-        currentMes = parsedData.currentMes;
-        document.getElementById("mesBadge").textContent = currentMes;
-      }
+          resolve(true);
+        } else {
+          const savedData = localStorage.getItem("confiteria_data");
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.categorias) {
+              Object.keys(parsedData.categorias).forEach(categoryKey => {
+                if (categorias[categoryKey]) {
+                  categorias[categoryKey] = parsedData.categorias[categoryKey];
+                }
+              });
+            }
 
-      return true;
+            if (parsedData.currentMes) {
+              currentMes = parsedData.currentMes;
+              document.getElementById("mesBadge").textContent = currentMes;
+            }
+          }
+          resolve(false);
+        }
+      });
+    } else {
+      const savedData = localStorage.getItem("confiteria_data");
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.categorias) {
+          Object.keys(parsedData.categorias).forEach(categoryKey => {
+            if (categorias[categoryKey]) {
+              categorias[categoryKey] = parsedData.categorias[categoryKey];
+            }
+          });
+        }
+
+        if (parsedData.currentMes) {
+          currentMes = parsedData.currentMes;
+          document.getElementById("mesBadge").textContent = currentMes;
+        }
+      }
+      resolve(false);
     }
-  } catch (error) {
-    console.error("Error al cargar datos:", error);
-  }
-  return false;
+  });
 }
 
 function editMes() {
@@ -7091,10 +7127,22 @@ function changeCategory(categoryKey) {
   renderTable();
 }
 
-// Inicializar la aplicación
-window.onload = function () {
-  loadData(); // Cargar datos guardados
-  loadLogoImage(); // Cargar el logo para el PDF
+window.onload = async function () {
+  await loadData(); // Cargar datos (desde Firebase o localStorage)
+  loadLogoImage(); // Cargar logo para PDF
   renderTable();
   updateOrderCounter();
 };
+
+function changeCategory(categoryKey) {
+  currentCategory = categoryKey;
+  document.getElementById("categoria-titulo").textContent = 
+    categorias[currentCategory].nombre;
+
+  // Solo desactivar modo edición al cambiar categoría, no el modo pedido
+  if (editMode) {
+    toggleEdit();
+  }
+
+  renderTable();
+}
